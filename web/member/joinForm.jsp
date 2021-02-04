@@ -25,7 +25,6 @@
                     $("input[name='age']").val('').focus();
                     return false;
                 }
-                console.log("form === " + checkid)
 
                 if (!checkid) {
                     alert("사용 가능한 id로 입력하세요");
@@ -61,7 +60,6 @@
                 if (!pattern.test(id)) {
                     $("#message").css('color', 'red').html("영문자 숫자 _로 5~12자 가능합니다.");
                     checkid = false;
-                    console.log("testfalse === " + checkid)
                 }
             })
         })
