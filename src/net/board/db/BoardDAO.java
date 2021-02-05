@@ -181,4 +181,80 @@ public class BoardDAO {
 
         return list;
     }
+
+    public void setReadCountUpdate(int num) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        String sql = "update board set board_readcount=board_readcount+1 " +
+                "where board_num = ?";
+
+        try {
+            conn = ds.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, num);
+            pstmt.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println("setReadCountUpdate() 에러 : " + ex);
+        } finally {
+            if(pstmt !=null)
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+        }
+    }
+
+    public Board getDetail(int num) {
+        Board board = null;
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ds.getConnection();
+            pstmt = conn.prepareStatement("select * from board where board_num = ?");
+            pstmt.setInt(1, num);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                board = new Board();
+                board.setBoard_num(rs.getInt("board_num"));
+                board.setBoard_name(rs.getString("board_name"));
+                board.setBoard_subject(rs.getString("board_subject"));
+                board.setBoard_content(rs.getString("board_content"));
+                board.setBoard_file(rs.getString("board_file"));
+                board.setBoard_re_ref(rs.getInt("board_re_ref"));
+                board.setBoard_re_lev(rs.getInt("board_re_lev"));
+                board.setBoard_re_seq(rs.getInt("board_re_seq"));
+                board.setBoard_re_readcount(rs.getInt("board_readcount"));
+                board.setBoard_date(rs.getString("board_date"));
+            }
+        } catch (SQLException ex) {
+            System.out.println("getDetail() 에러 : " + ex);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return board;
+    }
 }
