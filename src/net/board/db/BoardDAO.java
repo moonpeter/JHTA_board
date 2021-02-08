@@ -1,5 +1,7 @@
 package net.board.db;
 
+import sun.misc.Request;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -76,7 +78,7 @@ public class BoardDAO {
         return false;
     }
 
-    // 글의 갯수 구하
+    // 글의 갯수 구하기
     public int getListCount() {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -197,7 +199,7 @@ public class BoardDAO {
         } catch (SQLException ex) {
             System.out.println("setReadCountUpdate() 에러 : " + ex);
         } finally {
-            if(pstmt !=null)
+            if (pstmt != null)
                 try {
                     pstmt.close();
                 } catch (SQLException ex) {
@@ -256,5 +258,158 @@ public class BoardDAO {
             }
         }
         return board;
+    }
+
+    public int boardReply(Board board) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        int num = 0;
+
+        // board 테이블의 글번호를 구하기 위해 board_num 필드의 최대값을 구해옵니다.
+        String board_max_sql = "select max(board_num)+1 from board";
+
+        // 답변을 달 원문글 그룹 번호입니다.
+        // 답변을 달게 되면 답변 글은 이 번호와 같은 관련글 번호를 갖게 처리되면서 같은 그룹에 속하게 됩니다.
+        // 글목록에서 보여줄 때 하나의 그룹으로 묶여서 출력됩니다.
+        int re_ref = board.getBoard_re_ref();
+
+        // 답글의 깊이를 의미
+        // 원문에 대한 답글이 출력될 대 한 번 들여쓰기 처리가 되고 답글에 대한 답글은 들여쓰기가 두번 처리되게 합니다.
+        // 원문인 경우에는 이값이 0이고 원문의 답글은 1, 답글의 답글은 2가 됩니다.
+        int re_lev = board.getBoard_re_lev();
+
+        // 같은 관련 글 중에서 해당 글이 출력되는 순서입니다.
+        int re_seq = board.getBoard_re_seq();
+
+        try {
+            conn = ds.getConnection();
+
+            //트랜잭션을 이용하기 위해서 setAutoCommit을 false로 설정
+            conn.setAutoCommit(false);
+            pstmt = conn.prepareStatement(board_max_sql);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                num = rs.getInt(1);
+            }
+            pstmt.close();
+
+            // board_re_ref, board_re_seq 값을 확인하여 원문 글에 다른 답글이 있으면
+            // 다른 답글들의 board_re_seq 값을 1씩 증가시킵니다.
+            // 현재 글을 다른 답글보다 앞에 출력되게 하기 위해서 입니다.
+            String sql = "update board set board_re_seq=board_re_seq + 1 " +
+                    "where board_re_ref =? and board_re_seq > ?";
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, re_ref);
+            pstmt.setInt(2, re_seq);
+            pstmt.executeUpdate();
+            pstmt.close();
+
+            // 답변할 답변 글의 board_re_lev, board_re_seq 값을 원문 글보다 1씩 증가시킵니다.
+            re_seq = re_seq + 1;
+            re_lev = re_lev + 1;
+
+            String sql2 = "insert into board (board_num, board_name, board_pass, board_subject, board_content, board_file, board_re_ref, board_re_lev, board_re_seq, board_readcount) " +
+                    " values(" + num + ", ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            pstmt = conn.prepareStatement(sql2);
+            pstmt.setString(1, board.getBoard_name());
+            pstmt.setString(2, board.getBoard_pass());
+            pstmt.setString(3, board.getBoard_subject());
+            pstmt.setString(4, board.getBoard_content());
+            pstmt.setString(5, ""); //답변에는 파일을 업로드 X
+            pstmt.setInt(6, re_ref); // 원문의 글번호
+            pstmt.setInt(7, re_lev);
+            pstmt.setInt(8, re_seq);
+            pstmt.setInt(9, 0); // baord_readcount = 0
+            if (pstmt.executeUpdate() == 1) {
+                conn.commit(); // commit 합니다.
+            } else {
+                conn.rollback();
+            }
+
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            System.out.println("boardReply() 에러 : " + ex);
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return num;
+    }
+
+    public boolean boardUpdate(Board board) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        int result = 0;
+        try {
+            conn = ds.getConnection();
+
+            System.out.println("쿼리문 실행 전");
+            String sql = "update board set board_subject=?, board_content=? where board_num = ?";
+
+            pstmt = conn.prepareStatement(sql);
+            System.out.println("쿼리문 실행 후");
+
+            pstmt.setString(1, board.getBoard_name());
+            System.out.println("(DAO)getBoard_name : " + board.getBoard_name());
+            pstmt.setString(2, board.getBoard_content());
+            System.out.println("(DAO)getBoard_content : " + board.getBoard_content());
+            pstmt.setInt(3, board.getBoard_num());
+            System.out.println("(DAO)getBoard_num : " + board.getBoard_num());
+            result = pstmt.executeUpdate();
+            System.out.println("*************" + result);
+
+            if (result == 1) {
+                System.out.println("데이터 수정이 모두 완료되었습니다.");
+                return true;
+            }
+        } catch (Exception ex) {
+            System.out.println("boardInsert() 에러 : " + ex);
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (pstmt != null)
+                    pstmt.close();
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        return true;
     }
 }

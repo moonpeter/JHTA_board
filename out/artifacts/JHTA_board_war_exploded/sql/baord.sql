@@ -15,8 +15,11 @@ CREATE TABLE board(
     PRIMARY KEY(board_num)
 );
 
--- insert into board(board_num, board_name, board_pass, board_subject, board_content, board_file)  values(1, 'test', 'test', 'test', 'test', 'test');
-
 select nvl(max(board_num),0)+1 from board;
+
+update board
+set board_subject = 'changed subject'
+where board_num = 1;
+
 
 select * from board;

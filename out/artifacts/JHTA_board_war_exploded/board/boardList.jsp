@@ -79,9 +79,9 @@
                     <td>
                         <div>
                             <c:if test="${b.board_re_lev != 0}">
-                                <:c:forEach var="a" begin="0" end="${b.board_re_lev*2}" step="1">
+                                <c:forEach var="a" begin="0" end="${b.board_re_lev*2}" step="1">
                                     &nbsp;
-                                </:c:forEach>
+                                </c:forEach>
                                 <img src="/image/line.gif" alt="">
                             </c:if>
 

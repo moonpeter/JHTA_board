@@ -1,5 +1,9 @@
 package net.board.db;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 public class Board {
     private int     board_num;          // 글번호
     private String  board_name;         // 글작성자
@@ -100,4 +104,5 @@ public class Board {
     public void setBoard_date(String board_date) {
         this.board_date = board_date.substring(0,10);
     }
+
 }
