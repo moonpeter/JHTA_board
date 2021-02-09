@@ -412,4 +412,151 @@ public class BoardDAO {
         }
         return true;
     }
+
+    public boolean isBoardWriter(int num, String pass) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        boolean result = false;
+        String board_sql = "select BOARD_PASS from board where BOARD_NUM=?";
+        try {
+            conn = ds.getConnection();
+            pstmt = conn.prepareStatement(board_sql);
+            pstmt.setInt(1, num);
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                if(pass.equals(rs.getString("board_pass"))) {
+                    result = true;
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println("isBoardWriter() 에러 : " + ex);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    public boolean boardModify(Board board) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        String sql = "update board set board_subject=?, board_content=?, board_file=? where board_num=? ";
+        try {
+            conn = ds.getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, board.getBoard_subject());
+            pstmt.setString(2, board.getBoard_content());
+            pstmt.setString(3, board.getBoard_file());
+            pstmt.setInt(4, board.getBoard_num());
+            int result = pstmt.executeUpdate();
+            if (result == 1) {
+                System.out.println("업데이트 성공");
+                return true;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean boardDelete(int num) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        PreparedStatement pstmt2 = null;
+        ResultSet rs = null;
+        String select_sql = "select board_re_ref, board_re_lev, board_re_seq from board"
+                + " where board_num=?";
+        String board_delete_sql = "delete from board "
+                + "where board_re_ref=? and board_re_lev >=? and board_re_seq >=? "
+                + "and board_re_seq<=(nvl((select min(board_re_seq)-1 from board "
+                + "where board_re_ref=? and board_re_lev=? and board_re_seq>?) , "
+                + " (select max(board_re_seq) from board where board_re_ref=? )))";
+        boolean result_check = false;
+        try {
+            conn = ds.getConnection();
+            pstmt=conn.prepareStatement(select_sql);
+            pstmt.setInt(1, num);
+            rs = pstmt.executeQuery();
+            if(rs.next()) {
+                pstmt2 = conn.prepareStatement(board_delete_sql);
+                pstmt2.setInt(1, rs.getInt("board_re_ref"));
+                pstmt2.setInt(2, rs.getInt("board_re_lev"));
+                pstmt2.setInt(3, rs.getInt("board_re_seq"));
+                pstmt2.setInt(4, rs.getInt("board_re_ref"));
+                pstmt2.setInt(5, rs.getInt("board_re_lev"));
+                pstmt2.setInt(6, rs.getInt("board_re_seq"));
+                pstmt2.setInt(7, rs.getInt("board_re_ref"));
+
+                int count=pstmt2.executeUpdate();
+
+                if(count>=1)
+                    result_check = true; // 삭제가 안된 경우에는 false를 반환
+            }
+        } catch (Exception ex) {
+            System.out.println("boardDelete() 에러 : " + ex);
+            ex.printStackTrace();
+        } finally {
+            if(rs!=null)
+                try{
+                    rs.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            if(pstmt !=null)
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            if(pstmt2 != null)
+                try {
+                    pstmt2.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return result_check;
+    }
 }
