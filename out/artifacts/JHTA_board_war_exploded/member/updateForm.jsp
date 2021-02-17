@@ -20,11 +20,14 @@
             text-align: center;
             color: #1a92b9;
         }
+        input[type=file] {
+            display: none;
+        }
     </style>
 </head>
 <body>
 <jsp:include page="../board/header.jsp"/>
-<form action="updateProcess.net" name="joinform" method="post">
+<form action="updateProcess.net" name="joinform" method="post" enctype="multipart/form-data">
     <h3>회원 정보 수정</h3>
     <hr>
     <b>아이디</b>
@@ -48,6 +51,23 @@
     <b>이메일 주소</b>
     <input type="text" name="email" required value="${memberinfo.email}">
     <span id="email_message"></span>
+
+    <b>프로필 사진</b>
+    <label>
+        <img src="/image/attach.png" width="10px">
+        <span id="filename">${memberinfo.memberfile}</span>
+        <span id="showImage">
+            <c:if test="${empty memberinfo.memberfile}">
+                <c:set var="src" value="/image/profile.png"/>
+            </c:if>
+            <c:if test="${!empty memberinfo.memberfile}">
+                <c:set var="src" value="${'memberupload/'}${memberinfo.memberfile}"/>
+            </c:if>
+            <img src="${src}" width="20px" alt="profile">
+        </span>
+        <input type="file" name="memberfile" accept="image/*">
+    </label>
+
     <div class="clear-fix">
         <button type="submit" class="submitbtn">정보수정</button>
         <button type="reset" class="cancelbtn">다시작성</button>
@@ -87,6 +107,23 @@
             alert("email 형식을 확인하세요");
             $("input:eq(6)").focus();
             return false;
+        }
+    })
+
+    $('input[type=file]').change(function (event) {
+        var inputfile = $(this).val().split('\\');
+        var filename = inputfile[inputfile.length -1];
+        var pattern = /(gif|jpg|jpeg|png)$/i;
+        if(pattern.test(filename)) {
+            $('#filename').text(filename);
+
+            var reader = new FileReader();
+            reader.readAsDataURL(evetn.target.files[0]);
+            reader.onload = function(event) {
+                $('#showImage').html('<img width="20px" src="' + event.target.result + '">')
+            };
+        } else {
+            alert('확장자는 gif, jpg, jpeg, png가 가능합니다.');
         }
     })
 </script>

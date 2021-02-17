@@ -7,6 +7,15 @@ public class Member {
     private int age;
     private String gender;
     private String email;
+    private String memberfile;
+
+    public String getMemberfile() {
+        return memberfile;
+    }
+
+    public void setMemberfile(String memberfile) {
+        this.memberfile = memberfile;
+    }
 
     public String getId() {
         return id;

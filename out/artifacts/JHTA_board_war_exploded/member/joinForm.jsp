@@ -60,7 +60,22 @@
                 if (!pattern.test(id)) {
                     $("#message").css('color', 'red').html("영문자 숫자 _로 5~12자 가능합니다.");
                     checkid = false;
+                    return;
                 }
+
+                $.ajax({
+                    url: "idcheck.net",
+                    data: {"id" : id},
+                    success: function (resp) {
+                        if( resp == -1) {
+                            $("#message").css('color', 'green').html("사용가능한 아이디 입니다.");
+                            checkid = true;
+                        } else {
+                            $("#message").css('color', 'blue').html("사용중인 아이디 입니다.");
+                            checkid = false;
+                        }
+                    }
+                })
             })
         })
     </script>

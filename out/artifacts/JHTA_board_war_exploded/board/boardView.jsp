@@ -15,48 +15,87 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="/js/view.js"></script>
+    <link rel="stylesheet" href="/css/view.css">
     <style>
-        tr:nth-child(1) {text-align: center}
-        td:nth-child(1) {width: 20%}
-        a { color: white}
-        tr:nth-child(5)>td:nth-child(2)>a{color:black}
-        tbody tr:last-child {text-align: center}
-        .btn-primary {background-color: #4f97e5}
-        #myModal {display: none}
-        tr>td:nth-child(1) {font-weight: bold; font-size: 1em}
+        tr:nth-child(1) {
+            text-align: center
+        }
+
+        td:nth-child(1) {
+            width: 20%
+        }
+
+        a {
+            color: white
+        }
+
+        tr:nth-child(5) > td:nth-child(2) > a {
+            color: black
+        }
+
+        tbody tr:last-child {
+            text-align: center
+        }
+
+        .btn-primary {
+            background-color: #4f97e5
+        }
+
+        #myModal {
+            display: none
+        }
+
+        tr > td:nth-child(1) {
+            font-weight: bold;
+            font-size: 1em
+        }
     </style>
 </head>
 <body>
+<input type="hidden" id="loginid" value="${id}" name="loginid">
 <div class="container">
     <table class="table">
-        <tr><th colspan="2">MVC 게시판 - view 페이지</th></tr>
         <tr>
-            <td><div>글쓴이</div></td>
-            <td><div>${board.board_name}</div></td>
+            <th colspan="2">MVC 게시판 - view 페이지</th>
         </tr>
         <tr>
-            <td><div>제목</div></td>
+            <td>
+                <div>글쓴이</div>
+            </td>
+            <td>
+                <div>${board.board_name}</div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div>제목</div>
+            </td>
             <td><c:out value="${board.board_subject}"/></td>
         </tr>
         <tr>
-            <td><div>내용</div></td>
+            <td>
+                <div>내용</div>
+            </td>
             <td style="padding-right: 0px"><textarea class="form-control" rows="5"
-                readonly>${board.board_content}</textarea></td>
+                                                     readonly>${board.board_content}</textarea></td>
         </tr>
 
         <c:if test="${board.board_re_lev==0}">
             <tr>
-                <td><div>첨부파일</div></td>
+                <td>
+                    <div>첨부파일</div>
+                </td>
                 <c:if test="${!empty board.board_file}">
                     <td><img src="/image/down.png" width="10px">
                         <a href="BoardFileDown.bo?filename=${board.board_file}">
-                            ${board.board_file}
+                                ${board.board_file}
                         </a>
                     </td>
                 </c:if>
                 <c:if test="${empty board.board_file}">
                     <td></td>
-               </c:if>
+                </c:if>
             </tr>
         </c:if>
 
@@ -85,10 +124,11 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <form name="deleteForm" action="BoardDeleteAction.bo" method="post">
-                        <input type="hidden" name="num" value="${param.num}">
+                        <input type="hidden" name="num" value="${param.num}" id="board_re_ref">
                         <div class="form-group">
                             <label for="pwd">비밀번호</label>
-                            <input type="password" class="form-control" placeholder="Enter password" name="board_pass" id="board_pass">
+                            <input type="password" class="form-control" placeholder="Enter password" name="board_pass"
+                                   id="board_pass">
                         </div>
                         <button type="submit" class="btn btn-primary">전송</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal">취소</button>
@@ -97,6 +137,35 @@
             </div>
         </div>
     </div>
+
+    <div class="CommentBox">
+        <div class="comment_option">
+            <h3 class="comment_title">
+                댓글 <sup id="count"></sup>
+            </h3>
+            <div class="comment_tab">
+                <ul class="comment_tab_list">
+                </ul>
+            </div>
+        </div><!-- comment option end-->
+        <ul class="comment_list">
+        </ul>
+        <div class="CommentWriter">
+            <div class="comment_inbox">
+                <b class="comment_inbox_name">${id}</b> <span
+                    class="comment_inbox_count">0/200</span>
+                <textarea placeholder="댓글을 남겨보세요" rows="1"
+                          class="comment_inbox_text" maxLength="200"></textarea>
+
+            </div>
+            <div class="register_box">
+                <div class="button btn_cancel">취소</div>
+                <div class="button btn_register">등록</div>
+            </div>
+        </div><!--CommentWriter end-->
+    </div><!-- CommentBox end-->
+</div>
+
 </div>
 </body>
 </html>

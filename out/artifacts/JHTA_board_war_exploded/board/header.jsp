@@ -32,7 +32,6 @@
 
 <c:if test="${empty id}">
     <script>
-        location.href = "login.net"
     </script>
 </c:if>
 

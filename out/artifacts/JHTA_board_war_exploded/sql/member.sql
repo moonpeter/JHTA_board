@@ -10,6 +10,9 @@ email       varchar2(30),
 PRIMARY KEY(id)
 );
 
+alter table member
+add (memberfile varchar2(50));
+
 -- insert into member(id, password, name)
 -- values ('admin', '1234', '관리자');
 

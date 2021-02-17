@@ -11,6 +11,10 @@
 <head>
     <jsp:include page="header.jsp"/>
     <style>
+        select.form-control {
+            width: auto; margin-bottom: 2em; display: inline-block;
+        }
+        .rows{text-align: right}
         .gray {
             color: gray
         }
@@ -42,6 +46,16 @@
 <body>
 <div class="container">
     <c:if test="${listcount > 0}">
+        <div class="rows">
+            <span>줄보기</span>
+            <select class="form-control" id="viewcount">
+                <option value="1">1</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="7">7</option>
+                <option value="10" selected>10</option>
+            </select>
+        </div>
         <table class="table table-striped">
             <thead>
             <tr>

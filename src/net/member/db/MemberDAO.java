@@ -130,6 +130,7 @@ public class MemberDAO {
                 member.setAge(rs.getInt(4));
                 member.setGender(rs.getString(5));
                 member.setEmail(rs.getString(6));
+                member.setMemberfile(rs.getString(7));
             }
         } catch (Exception ex) {
             System.out.println("member_info() : 에러 " + ex);
@@ -160,7 +161,7 @@ public class MemberDAO {
         Connection conn = null;
         PreparedStatement pstmt = null;
         int result = 0;
-        String sql = "update member set NAME=?, age=?, gender=?, EMAIL=? where ID=? ";
+        String sql = "update member set NAME=?, age=?, gender=?, EMAIL=?, memberfile=? where ID=? ";
         try {
             conn = ds.getConnection();
             pstmt = conn.prepareStatement(sql);
@@ -168,7 +169,8 @@ public class MemberDAO {
             pstmt.setInt(2, member.getAge());
             pstmt.setString(3, member.getGender());
             pstmt.setString(4, member.getEmail());
-            pstmt.setString(5, member.getId());
+            pstmt.setString(5, member.getMemberfile());
+            pstmt.setString(6, member.getId());
             result = pstmt.executeUpdate();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -403,11 +405,11 @@ public class MemberDAO {
             pstmt = conn.prepareStatement(delete_sql);
             pstmt.setString(1, id);
             result = pstmt.executeUpdate();
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             System.out.println("memberDelete() 에러 : " + ex);
             ex.printStackTrace();
         } finally {
-            if(pstmt !=null)
+            if (pstmt != null)
                 try {
                     pstmt.close();
                 } catch (SQLException ex) {
@@ -422,5 +424,47 @@ public class MemberDAO {
             }
         }
         return result;
+    }
+
+    public int isId(String id) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        int result = -1;
+        try {
+            conn = ds.getConnection();
+
+            String sql = "select id from member where id = ? ";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, id);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                result = 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            if (pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return result;
+        }
     }
 }
