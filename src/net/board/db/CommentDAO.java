@@ -171,4 +171,138 @@ public class CommentDAO {
         }
         return result;
     }
+
+    public int commentUpdate(Comment co) {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        int result = 0;
+
+        try {
+            con = ds.getConnection();
+
+            String sql = "update comm set content = ? where num = ?";
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, co.getContent());
+            pstmt.setInt(2, co.getNum());
+
+            result = pstmt.executeUpdate();
+            if (result == 1) {
+                System.out.println("데이터 수정 되었습니다.");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("commentUpdate() 에러 : " + ex);
+        } finally {
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    public int commentDelete(int num) {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        int result = 0;
+
+        try {
+            con = ds.getConnection();
+
+            String sql = "delete from comm where num = ?";
+            pstmt = con.prepareStatement(sql);
+            pstmt.setInt(1, num);
+
+            result = pstmt.executeUpdate();
+            if (result == 1) {
+                System.out.println("데이터 삭제가 완료되었습니다.");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("commentDelete() 에러 : " + ex);
+        } finally {
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
+
+    public int commentReply(Comment co) {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        int result = 0;
+        try {
+            con = ds.getConnection();
+            con.setAutoCommit(false);
+            StringBuilder update_sql = new StringBuilder();
+            update_sql.append("update comm ");
+            update_sql.append("set comment_re_seq=comment_re_seq+1 ");
+            update_sql.append("where comment_re_ref=? ");
+            update_sql.append("and comment_re_seq> ? ");
+            pstmt = con.prepareStatement(update_sql.toString());
+            pstmt.setInt(1, co.getComment_re_ref());
+            pstmt.setInt(2, co.getComment_re_seq());
+            pstmt.executeUpdate();
+            pstmt.close();
+
+            String sql = "insert into comm "
+                    + " values(com_seq.nextval, ?, ? ,sysdate, ?, ?, ?, ?)";
+
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, co.getId());
+            pstmt.setString(2, co.getContent());
+            pstmt.setInt(3, co.getComment_board_num());
+            pstmt.setInt(4, co.getComment_re_lev() +1);
+            pstmt.setInt(5, co.getComment_re_seq() +1);
+            pstmt.setInt(6, co.getComment_re_ref());
+            result = pstmt.executeUpdate();
+            if(result==1){
+                System.out.println("reply 삽입 완료되었습니다.");
+                con.commit();
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("commentReply() 에러 : " + ex);
+        } finally {
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                    con.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return result;
+    }
 }

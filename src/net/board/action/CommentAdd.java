@@ -19,7 +19,6 @@ public class CommentAdd implements Action {
         co.setId(request.getParameter("id"));
         co.setContent(request.getParameter("content"));
         System.out.println("content = " + co.getContent());
-        System.out.println("++++++++++" + request.getParameter("comment_board_num"));
         co.setComment_board_num(Integer.parseInt(request.getParameter("comment_board_num")));
         co.setComment_re_lev(Integer.parseInt(request.getParameter("comment_re_lev")));
         co.setComment_re_seq(Integer.parseInt(request.getParameter("comment_re_seq")));
