@@ -27,8 +27,8 @@ public class BoardListAction implements Action {
         if (request.getParameter("page") != null) {
             page = Integer.parseInt(request.getParameter("page"));
         }
-
         System.out.println("넘어온 페이지 = " + page);
+
         // 추가
         if (request.getParameter("limit") != null) {
             limit = Integer.parseInt(request.getParameter("limit"));

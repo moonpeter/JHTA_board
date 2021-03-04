@@ -125,8 +125,10 @@ public class BoardDAO {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
 
-        String board_list_sql = "select * from(select rownum rnum, board_num, board_name, board_subject, board_content, board_file, board_re_ref, board_re_lev, board_re_seq, board_readcount, board_date " +
-                "from (select * from board order by board_re_ref desc, board_re_seq asc)) where rnum>=? and rnum<=? ";
+        String board_list_sql = "select * from" +
+                "(select rownum rnum, board_num, board_name, board_subject, board_content, board_file, board_re_ref, board_re_lev, board_re_seq, board_readcount, board_date " +
+                "from (select * from board order by board_re_ref desc, board_re_seq asc)) " +
+                "where rnum>=? and rnum<=? ";
 
         List<Board> list = new ArrayList<Board>();
         // 한 페이지당 10개씩 목록인 경우 1페이지, 2페이지, 3페이지, 4페이지 ...
